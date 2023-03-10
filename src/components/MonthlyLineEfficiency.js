@@ -5,6 +5,7 @@ import Form from "react-bootstrap/Form";
 import Card from "react-bootstrap/Card";
 import mqtt from "mqtt";
 
+
 function MonthlyLineEfficiency() {
   const [show, setShow] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -18,15 +19,33 @@ function MonthlyLineEfficiency() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const client = mqtt.connect('mqtt://test.mosquitto.org:8081', { protocol: 'mqtts', clientId: 'b0908853', useSSL: true });
+    const client = mqtt.connect('ws://'+ window.location.host +':8083',
+    {
+      clientId: "mqttjs01",
+      username: "ubuntu",
+      password: "1234",
+      port: 8083,
+      keepalive: 60,
+      reconnectPeriod: 1000,
+    });
 
     client.on("connect", () => {
       console.log("connected to MQTT broker");
       console.log("publishing to topic: monthly-line-efficiency");
-      console.log("message: ", inputValue);
 
-      client.publish("monthlylineefficiency", JSON.stringify([inputValue]));
+      client.publish("monthly-line-efficiency", JSON.stringify([inputValue])
+      ,function (err) {
+        if (err) {
+          console.log("Error publishing to topic: monthly-line-efficiency");
+        } else {
+          console.log("Published to topic: monthly-line-efficiency");
+        }
+      }
+
+      );
+      console.log(inputValue);
       client.end();
+
 
       setInputValue("");
     });
